@@ -4,6 +4,9 @@ import de.sample.garage.domain.exception.ShiftNotPossibleException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.*;
+
+
 class GearTransmissionTest {
 
     @Test
@@ -50,21 +53,25 @@ class GearTransmissionTest {
         var gt = new GearTransmission(3);
         //Act
         //Assert
-        Assertions.assertDoesNotThrow(gt::shiftUp);
-        Assertions.assertDoesNotThrow(gt::shiftUp);
-        Assertions.assertEquals(2, gt.getCurrentGear());
+        Assertions.assertAll(
+                () -> Assertions.assertDoesNotThrow(gt::shiftUp),
+                () -> Assertions.assertDoesNotThrow(gt::shiftUp),
+                () -> Assertions.assertThrows(ShiftNotPossibleException.class, gt::shiftUp),
+                () -> Assertions.assertEquals(2, gt.getCurrentGear())
+        );
     }
 
     @Test
     void shouldNotShiftUpMoreThanOnce() {
         //Arrange
-        var gt = new GearTransmission(1);
+        var gt = new GearTransmission(2);
         //Act
         //Assert
-        Assertions.assertDoesNotThrow(gt::shiftUp);
-        Assertions.assertThrows(ShiftNotPossibleException.class, gt::shiftUp);
-        Assertions.assertThrows(ShiftNotPossibleException.class, gt::shiftUp);
+        assertThatCode(gt::shiftUp).describedAs("Erstes Hochschalten").doesNotThrowAnyException();
+        assertThatThrownBy(gt::shiftUp).describedAs("Zweites Hochschalten").isInstanceOf(ShiftNotPossibleException.class);
+        assertThatThrownBy(gt::shiftUp).describedAs("Drittes Hochschalten").isInstanceOf(ShiftNotPossibleException.class);
     }
+
     @Test
     void getMaxGear() {
         //Arrange
